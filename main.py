@@ -1,11 +1,27 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", page_title="Daily Remark Summary", page_icon="📊", initial_sidebar_state="expanded")
 
-st.title('Excel File Uploader')
+# Apply dark mode
+st.markdown(
+    """
+    <style>
+    .reportview-container {
+        background: #2E2E2E;
+        color: white;
+    }
+    .sidebar .sidebar-content {
+        background: #2E2E2E;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-uploaded_file = st.sidebar.file_uploader("Choose an Excel file", type="xlsx")
+st.title('Daily Remark Summary')
+
+uploaded_file = st.sidebar.file_uploader("Upload Daily Remark File", type="xlsx")
 
 if uploaded_file is not None:
     df = pd.read_excel(uploaded_file)
@@ -103,7 +119,7 @@ if uploaded_file is not None:
         st.write("## Summary Table by Cycle Predictive")
 
         for cycle, cycle_group in df.groupby('Service No.'):
-            st.write(f"### Cycle: {cycle}")
+            st.write(f"Cycle: {cycle}")
             
             summary_table = pd.DataFrame(columns=[
                 'Day', 'ACCOUNTS', 'TOTAL DIALED', 'PENETRATION RATE (%)', 'CONNECTED #', 
@@ -145,7 +161,7 @@ if uploaded_file is not None:
     with col4:
         st.write("## Summary Table by Cycle Manual")
         for manual_cycle, manual_cycle_group in df.groupby('Service No.'):
-            st.write(f"### Cycle: {manual_cycle}")
+            st.write(f"Cycle: {manual_cycle}")
             
             summary_table = pd.DataFrame(columns=[
                 'Day', 'ACCOUNTS', 'TOTAL DIALED', 'PENETRATION RATE (%)', 'CONNECTED #', 
