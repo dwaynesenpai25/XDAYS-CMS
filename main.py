@@ -20,8 +20,8 @@ if uploaded_file is not None:
     
     for date, group in df.groupby(df['Date'].dt.date):
         
-        accounts = group[(group['Remark Type'] == 'Predictive') |  ((group['Remark Type'] == 'Follow Up') & (group['Remark By'] == 'SYSTEM'))]['Account No.'].nunique()
-        total_dialed = group[  (group['Remark Type'] == 'Predictive') |    ((group['Remark Type'] == 'Follow Up') & (group['Remark By'] == 'SYSTEM')) ]['Account No.'].count()
+        accounts = group[(group['Remark Type'] == 'Predictive') | ((group['Remark Type'] == 'Follow Up') & (group['Remark By'] == 'SYSTEM'))]['Account No.'].nunique()
+        total_dialed = group[  (group['Remark Type'] == 'Predictive') | ((group['Remark Type'] == 'Follow Up') & (group['Remark By'] == 'SYSTEM')) ]['Account No.'].count()
 
         connected = group[(group['Call Status'] == 'CONNECTED') & (group['Remark Type'].isin(['Predictive']))]['Account No.'].count()
         connected_rate = (connected / total_dialed * 100) if total_dialed != 0 else None
@@ -32,7 +32,7 @@ if uploaded_file is not None:
         ptp_acc = group[(group['Status'].str.contains('PTP', na=False)) & (group['PTP Amount'] != 0)]['Account No.'].nunique()
         ptp_rate = (ptp_acc / connected_acc * 100) if connected_acc != 0 else None
 
-        call_drop_count = group[(group['Status'] == 'DROPPED') & (group['Remark Type'] == 'Predictive')]['Account No.'].count()
+        call_drop_count = group[(group['Call Status'] == 'DROPPED') & (group['Remark Type'] == 'Predictive')]['Account No.'].count()
         call_drop_ratio = (call_drop_count / connected * 100) if connected != 0 else None
         
         overall_summary_table = pd.concat([overall_summary_table, pd.DataFrame([{
@@ -62,8 +62,8 @@ if uploaded_file is not None:
         ])
         
         for date, group in cycle_group.groupby(cycle_group['Date'].dt.date):
-            accounts = group[(group['Remark Type'] == 'Predictive') |  ((group['Remark Type'] == 'Follow Up') & (group['Remark By'] == 'SYSTEM'))]['Account No.'].nunique()
-            total_dialed = group[  (group['Remark Type'] == 'Predictive') |    ((group['Remark Type'] == 'Follow Up') & (group['Remark By'] == 'SYSTEM')) ]['Account No.'].count()
+            accounts = group[(group['Remark Type'] == 'Predictive') | ((group['Remark Type'] == 'Follow Up') & (group['Remark By'] == 'SYSTEM'))]['Account No.'].nunique()
+            total_dialed = group[  (group['Remark Type'] == 'Predictive') | ((group['Remark Type'] == 'Follow Up') & (group['Remark By'] == 'SYSTEM')) ]['Account No.'].count()
 
             connected = group[(group['Call Status'] == 'CONNECTED') & (group['Remark Type'].isin(['Predictive']))]['Account No.'].count()
             connected_rate = (connected / total_dialed * 100) if total_dialed != 0 else None
@@ -74,7 +74,7 @@ if uploaded_file is not None:
             ptp_acc = group[(group['Status'].str.contains('PTP', na=False)) & (group['PTP Amount'] != 0)]['Account No.'].nunique()
             ptp_rate = (ptp_acc / connected_acc * 100) if connected_acc != 0 else None
 
-            call_drop_count = group[(group['Status'] == 'DROPPED') & (group['Remark Type'] == 'Predictive')]['Account No.'].count()
+            call_drop_count = group[(group['Call Status'] == 'DROPPED') & (group['Remark Type'] == 'Predictive')]['Account No.'].count()
             call_drop_ratio = (call_drop_count / connected * 100) if connected != 0 else None
             
             summary_table = pd.concat([summary_table, pd.DataFrame([{
