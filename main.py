@@ -19,8 +19,9 @@ if uploaded_file is not None:
     ])
     
     for date, group in df.groupby(df['Date'].dt.date):
-        accounts = group[(group['Remark Type'].isin(['Predictive'])) & (group['Remark By'] == 'SYSTEM')]['Account No.'].nunique()
-        total_dialed = group[(group['Remark Type'].isin(['Predictive'])) & (group['Remark By'] == 'SYSTEM')]['Account No.'].count()
+        
+        accounts = group[(group['Remark Type'] == 'Predictive') |  ((group['Remark Type'] == 'Follow Up') & (group['Remark By'] == 'SYSTEM'))]['Account No.'].nunique()
+        total_dialed = group[  (group['Remark Type'] == 'Predictive') |    ((group['Remark Type'] == 'Follow Up') & (group['Remark By'] == 'SYSTEM')) ]['Account No.'].count()
 
         connected = group[(group['Call Status'] == 'CONNECTED') & (group['Remark Type'].isin(['Predictive']))]['Account No.'].count()
         connected_rate = (connected / total_dialed * 100) if total_dialed != 0 else None
@@ -61,8 +62,8 @@ if uploaded_file is not None:
         ])
         
         for date, group in cycle_group.groupby(cycle_group['Date'].dt.date):
-            accounts = group[(group['Remark Type'].isin(['Predictive'])) & (group['Remark By'] == 'SYSTEM')]['Account No.'].nunique()
-            total_dialed = group[(group['Remark Type'].isin(['Predictive'])) & (group['Remark By'] == 'SYSTEM')]['Account No.'].count()
+            accounts = group[(group['Remark Type'] == 'Predictive') |  ((group['Remark Type'] == 'Follow Up') & (group['Remark By'] == 'SYSTEM'))]['Account No.'].nunique()
+            total_dialed = group[  (group['Remark Type'] == 'Predictive') |    ((group['Remark Type'] == 'Follow Up') & (group['Remark By'] == 'SYSTEM')) ]['Account No.'].count()
 
             connected = group[(group['Call Status'] == 'CONNECTED') & (group['Remark Type'].isin(['Predictive']))]['Account No.'].count()
             connected_rate = (connected / total_dialed * 100) if total_dialed != 0 else None
