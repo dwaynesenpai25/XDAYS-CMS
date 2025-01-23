@@ -38,14 +38,14 @@ if uploaded_file is not None:
                 'Day': date,
                 'ACCOUNTS': accounts,
                 'TOTAL DIALED': total_dialed,
-                'PENETRATION RATE (%)': round(penetration_rate) if penetration_rate is not None else None,
+                'PENETRATION RATE (%)': f"{round(penetration_rate)}%" if penetration_rate is not None else None,
                 'CONNECTED #': connected,
-                'CONNECTED RATE (%)': round(connected_rate) if connected_rate is not None else None,
+                'CONNECTED RATE (%)': f"{round(connected_rate)}%" if connected_rate is not None else None,
                 'CONNECTED ACC': connected_acc,
                 'PTP ACC': ptp_acc,
-                'PTP RATE': round(ptp_rate) if ptp_rate is not None else None,
+                'PTP RATE': f"{round(ptp_rate)}%" if ptp_rate is not None else None,
                 'CALL DROP #': call_drop_count,
-                'CALL DROP RATIO #': round(call_drop_ratio) if call_drop_ratio is not None else None,
+                'CALL DROP RATIO #': f"{round(call_drop_ratio)}%" if call_drop_ratio is not None else None,
             }])], ignore_index=True)
         
         st.write(summary_table)
