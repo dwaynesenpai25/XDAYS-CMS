@@ -99,7 +99,7 @@ if uploaded_file is not None:
             summary_table = calculate_summary(manual_cycle_group, 'Outgoing')
             st.write(summary_table)
 
-    col5, col6 = st.columns(2)
+    col5, col6 = st.columns([3, 1])
 
     with col5:
         st.write("## Summary Table by Collector per Day")
@@ -112,7 +112,7 @@ if uploaded_file is not None:
         filtered_df = df[(df['Date'].dt.date >= start_date) & (df['Date'].dt.date <= end_date)]
 
         collector_summary = pd.DataFrame(columns=[
-            'Day', 'Collector', 'Total Connected', 'Total PTP', 'Total RPC', 'PTP Amount'
+            'Day', 'Collector', 'Total Connected', 'Total PTP', 'Total RPC', 'PTP Amount', 'Balance Amount'
         ])
         
         for (date, collector), collector_group in filtered_df[~filtered_df['Remark By'].str.upper().isin(['SYSTEM'])].groupby([filtered_df['Date'].dt.date, 'Remark By']):
@@ -120,6 +120,7 @@ if uploaded_file is not None:
             total_ptp = collector_group[collector_group['Status'].str.contains('PTP', na=False) & (collector_group['PTP Amount'] != 0)]['Account No.'].count()
             total_rpc = collector_group[collector_group['Status'].str.contains('RPC', na=False)]['Account No.'].count()
             ptp_amount = collector_group[collector_group['Status'].str.contains('PTP', na=False) & (collector_group['PTP Amount'] != 0)]['PTP Amount'].sum()
+            balance_amount = collector_group[collector_group['Status'].str.contains('PTP', na=False) & (collector_group['Balance'] != 0)]['Balance'].sum()
             
             collector_summary = pd.concat([collector_summary, pd.DataFrame([{
                 'Day': date,
@@ -127,7 +128,8 @@ if uploaded_file is not None:
                 'Total Connected': total_connected,
                 'Total PTP': total_ptp,
                 'Total RPC': total_rpc,
-                'PTP Amount': ptp_amount
+                'PTP Amount': ptp_amount,
+                'Balance Amount': balance_amount
             }])], ignore_index=True)
         
         st.write(collector_summary)
