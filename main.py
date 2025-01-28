@@ -186,7 +186,7 @@ if uploaded_file is not None:
 
         filtered_df = df[(df['Date'].dt.date >= start_date) & (df['Date'].dt.date <= end_date)]
 
-        collector_summary = pd.DataFrame(columns=[
+        cp_collector_summary = pd.DataFrame(columns=[
             'Day', 'Collector', 'Total Claim Paid','Claim Paid Amount','Balance Amount'
         ])
         
@@ -196,7 +196,7 @@ if uploaded_file is not None:
             balance_amount = collector_group[collector_group['Reason For Default'].str.contains('CURED', na=False) & (collector_group['Balance'] != 0)]['Balance'].sum()
             
             
-            collector_summary = pd.concat([collector_summary, pd.DataFrame([{
+            cp_collector_summary = pd.concat([cp_collector_summary, pd.DataFrame([{
                 'Day': date,
                 'Collector': collector,
                 'Total Claim Paid': claim_paid_count,
@@ -204,5 +204,5 @@ if uploaded_file is not None:
                 'Balance Amount': balance_amount
             }])], ignore_index=True)
         
-        st.write(collector_summary)
+        st.write(cp_collector_summary)
 
