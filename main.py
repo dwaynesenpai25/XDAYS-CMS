@@ -182,7 +182,7 @@ if uploaded_file is not None:
         # Add date filter
         min_date = df['Date'].min().date()
         max_date = df['Date'].max().date()
-        start_date, end_date = st.date_input("Select date range", [min_date, max_date], min_value=min_date, max_value=max_date)
+        start_date, end_date = st.date_input("Select date ranges", [min_date, max_date], min_value=min_date, max_value=max_date)
 
         filtered_df = df[(df['Date'].dt.date >= start_date) & (df['Date'].dt.date <= end_date)]
 
