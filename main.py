@@ -191,8 +191,8 @@ if uploaded_file is not None:
         ])
         
         for (date, collector), collector_group in filtered_df[~filtered_df['Remark By'].str.upper().isin(['SYSTEM'])].groupby([filtered_df['Date'].dt.date, 'Remark By']):
-            claim_paid_count = collector_group[collector_group['Reason For Default'].str.contains('CURED', na=False) &(collector_group['Claim Paid Amount'] != 0)]['Account No.'].nunique()
-            claim_paid_amount = collector_group[collector_group['Reason For Default'].str.contains('CURED', na=False) &(collector_group['Claim Paid Amount'] != 0)]['Claim Paid Amount'].sum()
+            claim_paid_count = collector_group[collector_group['Reason For Default'].str.contains('CURED', na=False) ]['Account No.'].nunique()
+            claim_paid_amount = collector_group[collector_group['Reason For Default'].str.contains('CURED', na=False)]['Claim Paid Amount'].sum()
             balance_amount = collector_group[collector_group['Reason For Default'].str.contains('CURED', na=False) & (collector_group['Balance'] != 0)]['Balance'].sum()
             
             
