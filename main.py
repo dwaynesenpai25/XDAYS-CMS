@@ -156,15 +156,18 @@ if uploaded_file is not None:
         filtered_df = df[(df['Date'].dt.date >= start_date) & (df['Date'].dt.date <= end_date)]
 
         collector_summary = pd.DataFrame(columns=[
-            'Day', 'Collector', 'Total Connected', 'Total PTP', 'Total RPC', 'PTP Amount', 'Balance Amount'
+            'Day', 'Collector', 'Total Connected', 'Total PTP', 'Total RPC', 'PTP Amount', 'Total Claim Paid','Claim Paid Amount','Balance Amount'
         ])
         
         for (date, collector), collector_group in filtered_df[~filtered_df['Remark By'].str.upper().isin(['SYSTEM'])].groupby([filtered_df['Date'].dt.date, 'Remark By']):
             total_connected = collector_group[collector_group['Call Status'] == 'CONNECTED']['Account No.'].count()
-            total_ptp = collector_group[collector_group['Status'].str.contains('PTP', na=False) & (collector_group['PTP Amount'] != 0)]['Account No.'].count()
-            total_rpc = collector_group[collector_group['Status'].str.contains('RPC', na=False)]['Account No.'].count()
+            total_ptp = collector_group[collector_group['Status'].str.contains('PTP', na=False) & (collector_group['PTP Amount'] != 0)]['Account No.'].nunique()
+            total_rpc = collector_group[collector_group['Status'].str.contains('RPC', na=False)]['Account No.'].nunique()
             ptp_amount = collector_group[collector_group['Status'].str.contains('PTP', na=False) & (collector_group['PTP Amount'] != 0)]['PTP Amount'].sum()
+            claim_paid_count = collector_group[(collector_group['Claim Paid Amount'] != 0)]['Account No.'].nunique()
+            claim_paid_amount = collector_group[(collector_group['Claim Paid Amount'] != 0)]['Claim Paid Amount'].sum()
             balance_amount = collector_group[collector_group['Status'].str.contains('PTP', na=False) & (collector_group['Balance'] != 0)]['Balance'].sum()
+            
             
             collector_summary = pd.concat([collector_summary, pd.DataFrame([{
                 'Day': date,
@@ -173,6 +176,8 @@ if uploaded_file is not None:
                 'Total PTP': total_ptp,
                 'Total RPC': total_rpc,
                 'PTP Amount': ptp_amount,
+                'Total Claim Paid': claim_paid_count,
+                'Claim Paid Amount': claim_paid_amount,
                 'Balance Amount': balance_amount
             }])], ignore_index=True)
         
