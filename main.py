@@ -75,7 +75,7 @@ if uploaded_file is not None:
 
     st.write("## Overall Combined Summary Table")
     combined_summary_table = calculate_combined_summary(df)
-    st.write(combined_summary_table, container_width=True)
+    st.write(combined_summary_table, use_container_width=True)
 
     def calculate_summary(df, remark_type, remark_by=None):
         summary_table = pd.DataFrame(columns=[
