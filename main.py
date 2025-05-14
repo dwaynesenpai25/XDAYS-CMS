@@ -130,16 +130,16 @@ if uploaded_file is not None:
     col3, col4 = st.columns(2)
 
     with col3:
-        st.write("## Summary Table by Cycle Predictive")
+        st.write("## Summary Table by Client Predictive")
         for cycle, cycle_group in df.groupby('Client'):
-            st.write(f"Cycle: {cycle}")
+            st.write(f"Client: {cycle}")
             summary_table = calculate_summary(cycle_group, 'Predictive', 'SYSTEM')
             st.write(summary_table)
 
     with col4:
-        st.write("## Summary Table by Cycle Manual")
+        st.write("## Summary Table by Client Manual")
         for manual_cycle, manual_cycle_group in df.groupby('Client'):
-            st.write(f"Cycle: {manual_cycle}")
+            st.write(f"Client: {manual_cycle}")
             summary_table = calculate_summary(manual_cycle_group, 'Outgoing')
             st.write(summary_table)
 
