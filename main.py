@@ -45,9 +45,9 @@ if uploaded_file is not None:
             accounts = group[group['Remark'] != 'Broken Promise']['Account No.'].nunique()
             total_dialed = group[group['Remark'] != 'Broken Promise']['Account No.'].count()
 
-            connected = group[group['Call Status'] == 'CONNECTED']['Account No.'].count()
+            connected = group[(group['Talk Time Duration'] > 1 )]['Account No.'].count()
             connected_rate = (connected / total_dialed * 100) if total_dialed != 0 else None
-            connected_acc = group[group['Call Status'] == 'CONNECTED']['Account No.'].nunique()
+            connected_acc = group[(group['Talk Time Duration'] > 1 )]['Account No.'].nunique()
 
             penetration_rate = (total_dialed / accounts * 100) if accounts != 0 else None
 
@@ -84,12 +84,12 @@ if uploaded_file is not None:
         ])
         
         for date, group in df.groupby(df['Date'].dt.date):
-            accounts = group[(group['Remark Type'] == remark_type) | ((group['Remark'] != 'Broken Promise') & (group['Remark Type'] == 'Follow Up') & (group['Remark By'] == remark_by))]['Account No.'].nunique()
-            total_dialed = group[(group['Remark Type'] == remark_type) | ((group['Remark'] != 'Broken Promise') & (group['Remark Type'] == 'Follow Up') & (group['Remark By'] == remark_by))]['Account No.'].count()
+            accounts = group[(group['Remark Type'] == remark_type) | ((group['Remark'] != 'Broken Promise') & (group['Remark By'] == remark_by))]['Account No.'].nunique()
+            total_dialed = group[(group['Remark Type'] == remark_type) | ((group['Remark'] != 'Broken Promise') & (group['Remark By'] == remark_by))]['Account No.'].count()
 
-            connected = group[(group['Call Status'] == 'CONNECTED') & (group['Remark Type'] == remark_type)]['Account No.'].count()
+            connected = group[(group['Remark Type'] == remark_type) & (group['Talk Time Duration'] > 1 ) ]['Account No.'].count()
             connected_rate = (connected / total_dialed * 100) if total_dialed != 0 else None
-            connected_acc = group[(group['Call Status'] == 'CONNECTED') & (group['Remark Type'] == remark_type)]['Account No.'].nunique()
+            connected_acc = group[(group['Remark Type'] == remark_type) & (group['Talk Time Duration'] > 1 ) ]['Account No.'].nunique()
 
             penetration_rate = (total_dialed / accounts * 100) if accounts != 0 else None
 
