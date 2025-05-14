@@ -29,6 +29,15 @@ def load_data(uploaded_file):
                                    , 'DASANTOS', 'SEMIJARES', 'GMCARIAN', 'RRRECTO', 'JMBORROMEO', 'EUGALERA','JATERRADO'])]
     return df
 
+
+def seconds_to_hhmmss(seconds):
+    if pd.isna(seconds):
+        return None
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    seconds = int(seconds % 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    
 uploaded_file = st.sidebar.file_uploader("Upload Daily Remark File", type="xlsx")
 
 if uploaded_file is not None:
@@ -38,25 +47,30 @@ if uploaded_file is not None:
     def calculate_combined_summary(df):
         summary_table = pd.DataFrame(columns=[
             'Day', 'ACCOUNTS', 'TOTAL DIALED', 'PENETRATION RATE (%)', 'CONNECTED #', 
-            'CONNECTED RATE (%)', 'CONNECTED ACC', 'PTP ACC', 'PTP RATE', 'CALL DROP #', 'CALL DROP RATIO #'
+            'CONNECTED RATE (%)', 'CONNECTED ACC', 'PTP ACC', 'PTP RATE', 'CALL DROP #', 
+            'CALL DROP RATIO #', 'AVG TALK TIME (HH:MM:SS)'
         ])
         
         for date, group in df.groupby(df['Date'].dt.date):
             accounts = group[group['Remark'] != 'Broken Promise']['Account No.'].nunique()
             total_dialed = group[group['Remark'] != 'Broken Promise']['Account No.'].count()
-
-            connected = group[group['Talk Time Duration'] > 1 ]['Account No.'].count()
+    
+            connected = group[group['Talk Time Duration'] > 1]['Account No.'].count()
             connected_rate = (connected / total_dialed * 100) if total_dialed != 0 else None
-            connected_acc = group[group['Talk Time Duration'] > 1 ]['Account No.'].nunique()
-
+            connected_acc = group[group['Talk Time Duration'] > 1]['Account No.'].nunique()
+    
             penetration_rate = (total_dialed / accounts * 100) if accounts != 0 else None
-
+    
             ptp_acc = group[(group['Status'].str.contains('PTP', na=False)) & (group['PTP Amount'] != 0)]['Account No.'].nunique()
             ptp_rate = (ptp_acc / connected_acc * 100) if connected_acc != 0 else None
-
+    
             call_drop_count = group[group['Call Status'] == 'DROPPED']['Account No.'].count()
             call_drop_ratio = (call_drop_count / connected * 100) if connected != 0 else None
-
+    
+            # Calculate average talk time duration
+            avg_talk_time = group[group['Talk Time Duration'] > 1]['Talk Time Duration'].mean()
+            avg_talk_time_formatted = seconds_to_hhmmss(avg_talk_time)
+    
             summary_table = pd.concat([summary_table, pd.DataFrame([{
                 'Day': date,
                 'ACCOUNTS': accounts,
@@ -69,6 +83,7 @@ if uploaded_file is not None:
                 'PTP RATE': f"{round(ptp_rate)}%" if ptp_rate is not None else None,
                 'CALL DROP #': call_drop_count,
                 'CALL DROP RATIO #': f"{round(call_drop_ratio)}%" if call_drop_ratio is not None else None,
+                'AVG TALK TIME (HH:MM:SS)': avg_talk_time_formatted
             }])], ignore_index=True)
         
         return summary_table
@@ -80,25 +95,30 @@ if uploaded_file is not None:
     def calculate_summary(df, remark_type, remark_by=None):
         summary_table = pd.DataFrame(columns=[
             'Day', 'ACCOUNTS', 'TOTAL DIALED', 'PENETRATION RATE (%)', 'CONNECTED #', 
-            'CONNECTED RATE (%)', 'CONNECTED ACC', 'PTP ACC', 'PTP RATE', 'CALL DROP #', 'CALL DROP RATIO #'
+            'CONNECTED RATE (%)', 'CONNECTED ACC', 'PTP ACC', 'PTP RATE', 'CALL DROP #', 
+            'CALL DROP RATIO #', 'AVG TALK TIME (HH:MM:SS)'
         ])
         
         for date, group in df.groupby(df['Date'].dt.date):
             accounts = group[(group['Remark Type'] == remark_type) | ((group['Remark'] != 'Broken Promise') & (group['Remark By'] == remark_by))]['Account No.'].nunique()
             total_dialed = group[(group['Remark Type'] == remark_type) | ((group['Remark'] != 'Broken Promise') & (group['Remark By'] == remark_by))]['Account No.'].count()
-
-            connected = group[(group['Remark Type'] == remark_type) & (group['Talk Time Duration'] > 1 ) ]['Account No.'].count()
+    
+            connected = group[(group['Remark Type'] == remark_type) & (group['Talk Time Duration'] > 1)]['Account No.'].count()
             connected_rate = (connected / total_dialed * 100) if total_dialed != 0 else None
-            connected_acc = group[(group['Remark Type'] == remark_type) & (group['Talk Time Duration'] > 1 ) ]['Account No.'].nunique()
-
+            connected_acc = group[(group['Remark Type'] == remark_type) & (group['Talk Time Duration'] > 1)]['Account No.'].nunique()
+    
             penetration_rate = (total_dialed / accounts * 100) if accounts != 0 else None
-
+    
             ptp_acc = group[(group['Status'].str.contains('PTP', na=False)) & (group['PTP Amount'] != 0) & (group['Remark Type'] == remark_type)]['Account No.'].nunique()
             ptp_rate = (ptp_acc / connected_acc * 100) if connected_acc != 0 else None
-
+    
             call_drop_count = group[(group['Call Status'] == 'DROPPED') & (group['Remark Type'] == remark_type)]['Account No.'].count()
             call_drop_ratio = (call_drop_count / connected * 100) if connected != 0 else None
-
+    
+            # Calculate average talk time duration
+            avg_talk_time = group[(group['Remark Type'] == remark_type) & (group['Talk Time Duration'] > 1)]['Talk Time Duration'].mean()
+            avg_talk_time_formatted = seconds_to_hhmmss(avg_talk_time)
+    
             summary_table = pd.concat([summary_table, pd.DataFrame([{
                 'Day': date,
                 'ACCOUNTS': accounts,
@@ -111,6 +131,7 @@ if uploaded_file is not None:
                 'PTP RATE': f"{round(ptp_rate)}%" if ptp_rate is not None else None,
                 'CALL DROP #': call_drop_count,
                 'CALL DROP RATIO #': f"{round(call_drop_ratio)}%" if call_drop_ratio is not None else None,
+                'AVG TALK TIME (HH:MM:SS)': avg_talk_time_formatted
             }])], ignore_index=True)
         
         return summary_table
