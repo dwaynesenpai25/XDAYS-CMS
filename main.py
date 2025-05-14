@@ -45,9 +45,9 @@ if uploaded_file is not None:
             accounts = group[group['Remark'] != 'Broken Promise']['Account No.'].nunique()
             total_dialed = group[group['Remark'] != 'Broken Promise']['Account No.'].count()
 
-            connected = group[(group['Talk Time Duration'] > 1 )]['Account No.'].count()
+            connected = group[group['Talk Time Duration'] > 1 ]['Account No.'].count()
             connected_rate = (connected / total_dialed * 100) if total_dialed != 0 else None
-            connected_acc = group[(group['Talk Time Duration'] > 1 )]['Account No.'].nunique()
+            connected_acc = group[group['Talk Time Duration'] > 1 ]['Account No.'].nunique()
 
             penetration_rate = (total_dialed / accounts * 100) if accounts != 0 else None
 
