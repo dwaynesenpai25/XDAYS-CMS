@@ -163,7 +163,7 @@ if uploaded_file is not None:
         total_connected = collector_group[collector_group['Call Status'] == 'CONNECTED']['Account No.'].count()
         total_ptp = collector_group[collector_group['Status'].str.contains('PTP', na=False) & (collector_group['PTP Amount'] != 0)]['Account No.'].nunique()
         total_rpc = collector_group[collector_group['Status'].str.contains('RPC', na=False)]['Account No.'].nunique()
-        ptp_amount = collector_group[collector_group['Status'].str.contains('PTP', na=False) & (collector_group['PTP Amount'] != 0)]['PTP Amount'].sum()
+        # ptp_amount = collector_group[collector_group['Status'].str.contains('PTP', na=False) & (collector_group['PTP Amount'] != 0)]['PTP Amount'].sum()
         
         
         collector_summary = pd.concat([collector_summary, pd.DataFrame([{
@@ -172,7 +172,7 @@ if uploaded_file is not None:
             'Total Connected': total_connected,
             'Total PTP': total_ptp,
             'Total RPC': total_rpc,
-            'PTP Amount': ptp_amount,
+            # 'PTP Amount': ptp_amount,
         }])], ignore_index=True)
     
     st.write(collector_summary)
