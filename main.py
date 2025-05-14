@@ -21,6 +21,15 @@ st.markdown(
 
 st.title('Daily Remark Summary')
 
+# Helper function to convert seconds to HH:MM:SS
+def seconds_to_hhmmss(seconds):
+    if pd.isna(seconds):
+        return None
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    seconds = int(seconds % 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
 @st.cache_data
 def load_data(uploaded_file):
     df = pd.read_excel(uploaded_file)
@@ -29,15 +38,6 @@ def load_data(uploaded_file):
                                    , 'DASANTOS', 'SEMIJARES', 'GMCARIAN', 'RRRECTO', 'JMBORROMEO', 'EUGALERA','JATERRADO'])]
     return df
 
-
-def seconds_to_hhmmss(seconds):
-    if pd.isna(seconds):
-        return None
-    hours = int(seconds // 3600)
-    minutes = int((seconds % 3600) // 60)
-    seconds = int(seconds % 60)
-    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-    
 uploaded_file = st.sidebar.file_uploader("Upload Daily Remark File", type="xlsx")
 
 if uploaded_file is not None:
@@ -54,23 +54,23 @@ if uploaded_file is not None:
         for date, group in df.groupby(df['Date'].dt.date):
             accounts = group[group['Remark'] != 'Broken Promise']['Account No.'].nunique()
             total_dialed = group[group['Remark'] != 'Broken Promise']['Account No.'].count()
-    
+
             connected = group[group['Talk Time Duration'] > 1]['Account No.'].count()
             connected_rate = (connected / total_dialed * 100) if total_dialed != 0 else None
             connected_acc = group[group['Talk Time Duration'] > 1]['Account No.'].nunique()
-    
+
             penetration_rate = (total_dialed / accounts * 100) if accounts != 0 else None
-    
+
             ptp_acc = group[(group['Status'].str.contains('PTP', na=False)) & (group['PTP Amount'] != 0)]['Account No.'].nunique()
             ptp_rate = (ptp_acc / connected_acc * 100) if connected_acc != 0 else None
-    
+
             call_drop_count = group[group['Call Status'] == 'DROPPED']['Account No.'].count()
             call_drop_ratio = (call_drop_count / connected * 100) if connected != 0 else None
-    
+
             # Calculate average talk time duration
             avg_talk_time = group[group['Talk Time Duration'] > 1]['Talk Time Duration'].mean()
             avg_talk_time_formatted = seconds_to_hhmmss(avg_talk_time)
-    
+
             summary_table = pd.concat([summary_table, pd.DataFrame([{
                 'Day': date,
                 'ACCOUNTS': accounts,
@@ -102,23 +102,23 @@ if uploaded_file is not None:
         for date, group in df.groupby(df['Date'].dt.date):
             accounts = group[(group['Remark Type'] == remark_type) | ((group['Remark'] != 'Broken Promise') & (group['Remark By'] == remark_by))]['Account No.'].nunique()
             total_dialed = group[(group['Remark Type'] == remark_type) | ((group['Remark'] != 'Broken Promise') & (group['Remark By'] == remark_by))]['Account No.'].count()
-    
+
             connected = group[(group['Remark Type'] == remark_type) & (group['Talk Time Duration'] > 1)]['Account No.'].count()
             connected_rate = (connected / total_dialed * 100) if total_dialed != 0 else None
             connected_acc = group[(group['Remark Type'] == remark_type) & (group['Talk Time Duration'] > 1)]['Account No.'].nunique()
-    
+
             penetration_rate = (total_dialed / accounts * 100) if accounts != 0 else None
-    
+
             ptp_acc = group[(group['Status'].str.contains('PTP', na=False)) & (group['PTP Amount'] != 0) & (group['Remark Type'] == remark_type)]['Account No.'].nunique()
             ptp_rate = (ptp_acc / connected_acc * 100) if connected_acc != 0 else None
-    
+
             call_drop_count = group[(group['Call Status'] == 'DROPPED') & (group['Remark Type'] == remark_type)]['Account No.'].count()
             call_drop_ratio = (call_drop_count / connected * 100) if connected != 0 else None
-    
+
             # Calculate average talk time duration
             avg_talk_time = group[(group['Remark Type'] == remark_type) & (group['Talk Time Duration'] > 1)]['Talk Time Duration'].mean()
             avg_talk_time_formatted = seconds_to_hhmmss(avg_talk_time)
-    
+
             summary_table = pd.concat([summary_table, pd.DataFrame([{
                 'Day': date,
                 'ACCOUNTS': accounts,
@@ -164,9 +164,6 @@ if uploaded_file is not None:
             summary_table = calculate_summary(manual_cycle_group, 'Outgoing')
             st.write(summary_table)
 
-    # col5, col6 = st.columns(2)
-
-    # with col5:
     st.write("## Summary Table by Collector per Day")
 
     # Add date filter
@@ -177,16 +174,16 @@ if uploaded_file is not None:
     filtered_df = df[(df['Date'].dt.date >= start_date) & (df['Date'].dt.date <= end_date)]
 
     collector_summary = pd.DataFrame(columns=[
-        'Day', 'Collector', 'Total Connected', 'Total PTP', 'Total RPC', 
-        # 'PTP Amount'
+        'Day', 'Collector', 'Total Connected', 'Total PTP', 'Total RPC', 'AVG TALK TIME (HH:MM:SS)'
     ])
     
     for (date, collector), collector_group in filtered_df[~filtered_df['Remark By'].str.upper().isin(['SYSTEM'])].groupby([filtered_df['Date'].dt.date, 'Remark By']):
         total_connected = collector_group[collector_group['Call Status'] == 'CONNECTED']['Account No.'].count()
         total_ptp = collector_group[collector_group['Status'].str.contains('PTP', na=False) & (collector_group['PTP Amount'] != 0)]['Account No.'].nunique()
         total_rpc = collector_group[collector_group['Status'].str.contains('RPC', na=False)]['Account No.'].nunique()
-        # ptp_amount = collector_group[collector_group['Status'].str.contains('PTP', na=False) & (collector_group['PTP Amount'] != 0)]['PTP Amount'].sum()
-        
+        # Calculate average talk time for connected calls
+        avg_talk_time = collector_group[collector_group['Call Status'] == 'CONNECTED']['Talk Time Duration'].mean()
+        avg_talk_time_formatted = seconds_to_hhmmss(avg_talk_time)
         
         collector_summary = pd.concat([collector_summary, pd.DataFrame([{
             'Day': date,
@@ -194,37 +191,7 @@ if uploaded_file is not None:
             'Total Connected': total_connected,
             'Total PTP': total_ptp,
             'Total RPC': total_rpc,
-            # 'PTP Amount': ptp_amount,
+            'AVG TALK TIME (HH:MM:SS)': avg_talk_time_formatted
         }])], ignore_index=True)
     
     st.write(collector_summary)
-    # with col6:
-    #     st.write("## Claim Paid Summary Table")
-
-    #     # Add date filter
-    #     min_date = df['Date'].min().date()
-    #     max_date = df['Date'].max().date()
-    #     start_date, end_date = st.date_input("Select date ranges", [min_date, max_date], min_value=min_date, max_value=max_date)
-
-    #     filtered_df = df[(df['Date'].dt.date >= start_date) & (df['Date'].dt.date <= end_date)]
-
-    #     cp_collector_summary = pd.DataFrame(columns=[
-    #         'Day', 'Collector', 'Total Claim Paid','Claim Paid Amount','Balance Amount'
-    #     ])
-        
-    #     for (date, collector), collector_group in filtered_df[~filtered_df['Remark By'].str.upper().isin(['SYSTEM'])].groupby([filtered_df['Date'].dt.date, 'Remark By']):
-    #         claim_paid_count = collector_group[collector_group['Reason For Default'].str.contains('CURED', na=False) ]['Account No.'].nunique()
-    #         claim_paid_amount = collector_group[collector_group['Reason For Default'].str.contains('CURED', na=False)]['Claim Paid Amount'].sum()
-    #         balance_amount = collector_group[collector_group['Reason For Default'].str.contains('CURED', na=False) & (collector_group['Balance'] != 0)]['Balance'].sum()
-            
-            
-    #         cp_collector_summary = pd.concat([cp_collector_summary, pd.DataFrame([{
-    #             'Day': date,
-    #             'Collector': collector,
-    #             'Total Claim Paid': claim_paid_count,
-    #             'Claim Paid Amount': claim_paid_amount,
-    #             'Balance Amount': balance_amount
-    #         }])], ignore_index=True)
-        
-    #     st.write(cp_collector_summary)
-
